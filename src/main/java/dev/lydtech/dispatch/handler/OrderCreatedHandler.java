@@ -7,6 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
+import static dev.lydtech.dispatch.DispatchConfiguration.ORDER_CREATED_TOPIC;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -16,7 +18,7 @@ public class OrderCreatedHandler {
 
     @KafkaListener(
             id = "orderConsumerClient",
-            topics = "order.created",
+            topics = ORDER_CREATED_TOPIC,
             groupId = "dispatch.order.created.consumer",
             containerFactory = "kafkaListenerContainerFactory"
     )
