@@ -1,5 +1,6 @@
 package dev.lydtech.dispatch.service;
 
+import dev.lydtech.dispatch.message.DispatchCompleted;
 import dev.lydtech.dispatch.message.DispatchPrepared;
 import dev.lydtech.dispatch.message.OrderCreated;
 import dev.lydtech.dispatch.message.OrderDispatched;
@@ -38,10 +39,12 @@ class DispatchServiceTest {
 
         when(kafkaProducerMock.send(anyString(), anyString(), any(OrderDispatched.class))).thenReturn(completableFuture);
         when(kafkaProducerMock.send(anyString(), anyString(), any(DispatchPrepared.class))).thenReturn(completableFuture);
+        when(kafkaProducerMock.send(anyString(), anyString(), any(DispatchCompleted.class))).thenReturn(completableFuture);
         OrderCreated testEvent = TestEventData.buildOrderCreatedEvent(randomUUID(), randomUUID().toString());
         dispatchService.process(key, testEvent);
         verify(kafkaProducerMock, times(1)).send(eq(DispatchService.ORDER_DISPATCHED_TOPIC), eq(key), any(OrderDispatched.class));
         verify(kafkaProducerMock, times(1)).send(eq(DispatchService.DISPATCH_TRACKING_TOPIC), eq(key), any(DispatchPrepared.class));
+        verify(kafkaProducerMock, times(1)).send(eq(DispatchService.DISPATCH_TRACKING_TOPIC), eq(key), any(DispatchCompleted.class));
     }
 
     @Test
