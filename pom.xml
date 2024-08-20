@@ -15,11 +15,16 @@
 	<description>Introduction to Kafka with Spring Boot 3</description>
 	<properties>
 		<java.version>21</java.version>
+		<spring-cloud-contract-wiremock.version>4.1.4</spring-cloud-contract-wiremock.version>
 	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.kafka</groupId>
@@ -48,6 +53,12 @@
 		<dependency>
 			<groupId>org.springframework.kafka</groupId>
 			<artifactId>spring-kafka-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-contract-wiremock</artifactId>
+			<version>${spring-cloud-contract-wiremock.version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

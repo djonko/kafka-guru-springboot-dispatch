@@ -1,5 +1,6 @@
 package dev.lydtech.dispatch.service;
 
+import dev.lydtech.dispatch.client.StockServiceClient;
 import dev.lydtech.dispatch.message.DispatchCompleted;
 import dev.lydtech.dispatch.message.DispatchPrepared;
 import dev.lydtech.dispatch.message.OrderCreated;
@@ -25,18 +26,19 @@ class DispatchServiceTest {
     private DispatchService dispatchService;
     private KafkaTemplate kafkaProducerMock;
     private CompletableFuture completableFuture;
+    private StockServiceClient stockServiceClientMock;
 
     @BeforeEach
     void setUp() {
         kafkaProducerMock = mock(KafkaTemplate.class);
-        dispatchService = new DispatchService(kafkaProducerMock);
+        stockServiceClientMock = mock(StockServiceClient.class);
+        dispatchService = new DispatchService(kafkaProducerMock, stockServiceClientMock);
         completableFuture = CompletableFuture.completedFuture(mock(SendResult.class));
     }
 
     @Test
     void process_Success() throws Exception {
-
-
+        when(stockServiceClientMock.checkAvailability(anyString())).thenReturn("true");
         when(kafkaProducerMock.send(anyString(), anyString(), any(OrderDispatched.class))).thenReturn(completableFuture);
         when(kafkaProducerMock.send(anyString(), anyString(), any(DispatchPrepared.class))).thenReturn(completableFuture);
         when(kafkaProducerMock.send(anyString(), anyString(), any(DispatchCompleted.class))).thenReturn(completableFuture);
@@ -45,6 +47,7 @@ class DispatchServiceTest {
         verify(kafkaProducerMock, times(1)).send(eq(DispatchService.ORDER_DISPATCHED_TOPIC), eq(key), any(OrderDispatched.class));
         verify(kafkaProducerMock, times(1)).send(eq(DispatchService.DISPATCH_TRACKING_TOPIC), eq(key), any(DispatchPrepared.class));
         verify(kafkaProducerMock, times(1)).send(eq(DispatchService.DISPATCH_TRACKING_TOPIC), eq(key), any(DispatchCompleted.class));
+        verify(stockServiceClientMock, times(1)).checkAvailability(anyString());
     }
 
     @Test

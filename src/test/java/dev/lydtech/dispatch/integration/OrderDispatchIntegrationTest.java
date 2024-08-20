@@ -11,6 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.KafkaHandler;
@@ -32,6 +33,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static dev.lydtech.dispatch.integration.WiremockUtils.stubWiremock;
 import static java.util.UUID.randomUUID;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.equalTo;
@@ -41,6 +43,7 @@ import static org.hamcrest.Matchers.equalTo;
 @ActiveProfiles("test")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @EmbeddedKafka(controlledShutdown = true)
+@AutoConfigureWireMock(port = 0)
 public class OrderDispatchIntegrationTest {
 
     @Autowired
@@ -54,11 +57,13 @@ public class OrderDispatchIntegrationTest {
         kafkaTestListener.dispatchPreparingCounter.set(0);
         kafkaTestListener.orderDispatchedCounter.set(0);
         kafkaTestListener.dispatchCompletingCounter.set(0);
+        WiremockUtils.reset();
         kafkaListenerEndpointRegistry.getListenerContainers().forEach(container -> ContainerTestUtils.waitForAssignment(container, Objects.requireNonNull(container.getContainerProperties().getTopics()).length * broker.getPartitionsPerTopic()));
     }
 
     @Test
     public void testOrderDispatchFlow() throws Exception {
+        stubWiremock("/api/stock?item=my-item", 200, "true");
         OrderCreated orderCreated = OrderCreated.builder().orderId(UUID.randomUUID()).item("my-item").build();
         String key = randomUUID().toString();
         sendMessage(DispatchConfiguration.ORDER_CREATED_TOPIC, key, orderCreated);
