@@ -34,16 +34,16 @@ public class DispatchService {
                     .builder()
                     .orderId(payload.getOrderId())
                     .processedById(APPLICATION_ID)
-                    .notes("Dispatched: "+ payload.getItem())
+                    .notes("Dispatched: " + payload.getItem())
                     .build();
             DispatchPrepared dispatchPrepared = DispatchPrepared.builder().orderId(payload.getOrderId()).build();
             DispatchCompleted dispatchCompleted = DispatchCompleted.builder().orderId(payload.getOrderId()).date(LocalDateTime.now().atOffset(ZoneOffset.UTC).format(ISO_OFFSET_DATE_TIME)).build();
 
-            kafkaProducer.send(ORDER_DISPATCHED_TOPIC,key, orderDispatched).get();
-            kafkaProducer.send(DISPATCH_TRACKING_TOPIC,key, dispatchPrepared).get();
-            kafkaProducer.send(DISPATCH_TRACKING_TOPIC,key, dispatchCompleted).get();
-            log.info("Sent messages: key({}) - orderId: {} - processedById: {}",key, payload.getOrderId(), APPLICATION_ID);
-        }else {
+            kafkaProducer.send(ORDER_DISPATCHED_TOPIC, key, orderDispatched).get();
+            kafkaProducer.send(DISPATCH_TRACKING_TOPIC, key, dispatchPrepared).get();
+            kafkaProducer.send(DISPATCH_TRACKING_TOPIC, key, dispatchCompleted).get();
+            log.info("Sent messages: key({}) - orderId: {} - processedById: {}", key, payload.getOrderId(), APPLICATION_ID);
+        } else {
             log.info("Item {} is not available", payload.getItem());
         }
 

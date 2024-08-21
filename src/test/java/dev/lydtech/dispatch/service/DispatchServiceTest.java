@@ -53,13 +53,14 @@ class DispatchServiceTest {
     @Test
     void process_ProducerThrowException() {
         OrderCreated testEvent = TestEventData.buildOrderCreatedEvent(randomUUID(), randomUUID().toString());
+        when(stockServiceClientMock.checkAvailability(anyString())).thenReturn("true");
         doThrow(new RuntimeException("Producer failed")).when(kafkaProducerMock)
                 .send(eq("order.dispatched"), anyString(), any(OrderDispatched.class));
 
         Exception exception = assertThrows(RuntimeException.class, () -> dispatchService.process(key, testEvent));
 
-        verify(kafkaProducerMock, times(1))
-                .send(eq("order.dispatched"), eq(key), any(OrderDispatched.class));
+        verify(kafkaProducerMock, times(1)).send(eq(DispatchService.ORDER_DISPATCHED_TOPIC), eq(key), any(OrderDispatched.class));
+        verify(stockServiceClientMock, times(1)).checkAvailability(anyString());
 
         assertEquals(exception.getMessage(), "Producer failed");
     }
